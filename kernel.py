@@ -98,6 +98,7 @@ class Kernel:
             self.timer_count += 1
             if(self.timer_count == 4):
                 self.timer_count = 0
+                self.ready_queue.append(self.running)
                 self.running = self.idle_pcb
                 self.choose_next_process()
         return self.running.pid 
