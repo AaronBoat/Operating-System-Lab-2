@@ -96,10 +96,13 @@ class Kernel:
     # DO NOT rename or delete this method. DO NOT change its arguments.
     def timer_interrupt(self) -> PID:
         if self.scheduling_algorithm == "RR":
-            self.timer_count += 1
-            if(self.timer_count == 4):
+            if self.running != self.idle_pcb:    
+                self.timer_count += 1
+                if(self.timer_count == 4):
+                    self.timer_count = 0
+                    self.ready_queue.append(self.running)
+                    self.running = self.idle_pcb
+                    self.choose_next_process()
+            else:
                 self.timer_count = 0
-                self.ready_queue.append(self.running)
-                self.running = self.idle_pcb
-                self.choose_next_process()
         return self.running.pid 
