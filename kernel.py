@@ -57,6 +57,7 @@ class Kernel:
 
     # This method is triggered every time the current process performs an exit syscall.
     # DO NOT rename or delete this method. DO NOT change its arguments.
+    ## Todo: 
     def syscall_exit(self) -> PID:
         self.running = self.idle_pcb
         self.choose_next_process()
@@ -98,4 +99,5 @@ class Kernel:
             if(self.timer_count == 4):
                 self.timer_count = 0
                 self.running = self.idle_pcb
+                self.choose_next_process()
         return self.running.pid 
