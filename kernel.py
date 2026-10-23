@@ -30,6 +30,9 @@ class Kernel:
     running: PCB
     idle_pcb: PCB
 
+    ## add timer count for RR
+    timer_count: int
+
     # Called before the simulation begins.
     # Use this method to initilize any variables you need throughout the simulation.
     # logger is provided which allows you to include your own print statements in the
@@ -42,6 +45,7 @@ class Kernel:
         self.waiting_queue = deque()
         self.idle_pcb = PCB(0, 0)
         self.running = self.idle_pcb
+        self.timer_count = 0
 
     # This method is triggered every time a new process has arrived.
     # new_process is this process's PID.
@@ -78,11 +82,20 @@ class Kernel:
             if self.running is self.idle_pcb:
                 self.running = self.ready_queue.popleft()
         else:
-            print("Unknown scheduling algorithm")
+            if self.scheduling_algorithm == "RR":
+                if self.running is self.idle_pcb:
+                    self.running = self.ready_queue.popleft()
+            else:    
+                print("Unknown scheduling algorithm")
 
     # This method represents the hardware timer interrupt.
     # It is triggered every 10 milliseconds and is the only way our kernel can track passing time.
     # Do not use real time to track how much time has passed as time is simulated.
     # DO NOT rename or delete this method. DO NOT change its arguments.
     def timer_interrupt(self) -> PID:
+        if self.scheduling_algorithm == "RR":
+            self.timer_count += 1
+            if(self.timer_count == 4):
+                self.timer_count = 0
+                self.running = self.idle_pcb
         return self.running.pid 
