@@ -77,6 +77,32 @@ class Kernel:
         if self.scheduling_algorithm == "FCFS":
             if self.running is self.idle_pcb:
                 self.running = self.ready_queue.popleft()
+
+        elif self.scheduling_algorithm == "Priority":
+            candidate = self.ready_queue[0]
+
+            for process in self.ready_queue: #find the highest priority process from the ready_queue, then compare it with the current running process
+                if process.priority > candidate.priority:
+                    candidate = process
+                elif process.priority == candidate.priority:
+                    if process.pid < candidate.pid:
+                        candidate = process
+
+            if self.running is self.idle_pcb:  #check if CPU is idle
+                self.ready_queue.remove(candidate)
+                self.running = candidate
+
+            elif self.running.priority < candidate.priority: #if cpu not idle, is the current running priority smaller than the candidate priority
+                self.ready_queue.remove(candidate)
+                self.ready_queue.append(self.running)
+                self.running = candidate
+
+            elif self.running.priority == candidate.priority: #if same priority we need to check pid
+                if candidate.pid < self.running.pid:
+                    self.ready_queue.remove(candidate)
+                    self.ready_queue.append(self.running)
+                    self.running = candidate
+
         else:
             print("Unknown scheduling algorithm")
 
