@@ -105,4 +105,4 @@ class Kernel:
                     self.choose_next_process()
             else:
                 self.timer_count = 0
-        return self.running.pid 
+        return self.running.pid
