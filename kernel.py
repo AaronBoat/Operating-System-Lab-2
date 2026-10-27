@@ -1,6 +1,6 @@
 ### Fill in the following information before submitting
-# Group id: 
-# Members: 
+# Group id: 11
+# Members: Yizhou Xu, Wendy Wu, Khang Tran
 
 
 
@@ -14,10 +14,15 @@ PID = int
 class PCB:
     pid: PID
     priority: int
+    process_type: str
 
-    def __init__(self, pid: PID, priority: int):
+    def __init__(self, pid: PID, priority: int, process_type: str="Foreground"):
         self.pid = pid
         self.priority = priority
+        self.process_type
+        # NOTE: process_type default here is Foreground but it doesn't have any meaning -> (FCFS, P, RR have no use for it)
+        #       The default argument is provided so the PCB constructor call on line 51 works.
+        #       (I didn't want to change the init() arguments for Kernel)
 
 
 # This class represents the Kernel of the simulation.
@@ -45,13 +50,18 @@ class Kernel:
         self.waiting_queue = deque()
         self.idle_pcb = PCB(0, 0)
         self.running = self.idle_pcb
+    
         self.timer_count = 0
+        self.foreground_q = deque()             # Foreground queue using RR
+        self.background_q = deque()             # Background queue using FCFS
+        self.current_level = "Foreground"       # Level currently open
+        self.level_count = 0                    # Timer interrupts since the current level opened
 
     # This method is triggered every time a new process has arrived.
     # new_process is this process's PID.
     # DO NOT rename or delete this method. DO NOT change its arguments.
     def new_process_arrived(self, new_process: PID, priority: int, process_type: str) -> PID:
-        self.ready_queue.append(PCB(new_process, priority))
+        self.ready_queue.append(PCB(new_process, priority, process_type))
         self.choose_next_process()
         return self.running.pid  
 
@@ -84,45 +94,53 @@ class Kernel:
             if self.running is self.idle_pcb:
                 self.running = self.ready_queue.popleft()
 
+
         elif self.scheduling_algorithm == "Priority":
             candidate = self.ready_queue[0]
 
-            for process in self.ready_queue: #find the highest priority process from the ready_queue, then compare it with the current running process
-                if process.priority > candidate.priority:
+            for process in self.ready_queue:                                # Find the highest priority process from the ready_queue,
+                if process.priority > candidate.priority:                   # then compare it with the current running process
                     candidate = process
-                elif process.priority == candidate.priority:
+                elif process.priority == candidate.priority:                # If same priority, compare by PID (lower PID wins)
                     if process.pid < candidate.pid:
                         candidate = process
 
-            if self.running is self.idle_pcb:  #check if CPU is idle
+            if self.running is self.idle_pcb:                               # If CPU is idle, run the candidate process
                 self.ready_queue.remove(candidate)
                 self.running = candidate
 
-            elif self.running.priority < candidate.priority: #if cpu not idle, is the current running priority smaller than the candidate priority
-                self.ready_queue.remove(candidate)
+            elif self.running.priority < candidate.priority:                # If cpu not idle, check if the current running priority
+                self.ready_queue.remove(candidate)                          # is smaller than the candidate priority
                 self.ready_queue.append(self.running)
                 self.running = candidate
 
-            elif self.running.priority == candidate.priority: #if same priority we need to check pid
+            elif self.running.priority == candidate.priority:               # If same priority we need to check pid
                 if candidate.pid < self.running.pid:
                     self.ready_queue.remove(candidate)
                     self.ready_queue.append(self.running)
                     self.running = candidate
 
-        else:
-            if self.scheduling_algorithm == "RR":
-                if self.running is self.idle_pcb:
-                    self.running = self.ready_queue.popleft()
-            else:    
-                print("Unknown scheduling algorithm")
+
+        elif self.scheduling_algorithm == "RR":
+            if self.running is self.idle_pcb:
+                self.running = self.ready_queue.popleft()
+
+
+        elif self.scheduling_algorithm == "Multilevel":
+            return
+
+        
+        else:    
+            print("Unknown scheduling algorithm")
+
 
     # This method represents the hardware timer interrupt.
     # It is triggered every 10 milliseconds and is the only way our kernel can track passing time.
     # Do not use real time to track how much time has passed as time is simulated.
     # DO NOT rename or delete this method. DO NOT change its arguments.
     def timer_interrupt(self) -> PID:
-        if self.scheduling_algorithm == "RR":
-            if self.running != self.idle_pcb:    
+        if self.scheduling_algorithm == "RR":                               # timer_interrupt() gets called in simulator.py
+            if self.running != self.idle_pcb:                               # Modify timer_count when ALGO=RR to simulate RR time quantum
                 self.timer_count += 1
                 if(self.timer_count == 4):
                     self.timer_count = 0
