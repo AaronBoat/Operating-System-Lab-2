@@ -11,6 +11,10 @@ class Semaphore:
     value: int
     waiting_queue: deque = deque()
 
+@dataclass
+class Mutex:
+    owner: PID | None
+    waiting_queue: deque = deque()
 # PID is just an integer, but it is used to make it clear when a integer is expected to be a valid PID.
 PID = int
 
@@ -43,6 +47,7 @@ class Kernel:
     running: PCB
     idle_pcb: PCB
     semaphores: dict[int, Semaphore]
+    mutexes: dict[int, Mutex]
 
     ## add timer count for RR
     timer_count: int
@@ -67,6 +72,7 @@ class Kernel:
         self.level_count = 0                    # Timer interrupts for ML scheduling
 
         self.semaphores = {}    #semaphores: index from id to {value,waiting queue}
+        self.mutexes = {} #mutexes: index from id to {owner, waiting queue}
     # This method is triggered every time a new process has arrived.
     # new_process is this process's PID.
     # DO NOT rename or delete this method. DO NOT change its arguments.
@@ -242,6 +248,7 @@ def syscall_semaphore_v(self, semaphore_id: int) -> PID:
 # This method is triggered when the currently running process requests to initialize a new mutex.
 # DO NOT rename or delete this method. DO NOT change its arguments.
 def syscall_init_mutex(self, mutex_id: int):
+    self.mutexes[mutex_id] = Mutex(None,deque())
     return
 
 # This method is triggered when the currently running process calls lock() on an existing mutex.
