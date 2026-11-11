@@ -1,0 +1,41 @@
+0.000s : Foreground process 1 arrived with priority 50
+0.000s : Context switching to pid: 1
+
+0.010s : Mutex 0 initilized
+0.010s : Process 1 called lock on mutex 0
+
+0.020s : Foreground process 2 arrived with priority 70
+0.020s : Context switching to pid: 2
+
+0.030s : Semaphore 0 initilized with value 0
+0.030s : Process 2 called p on semaphore 0
+0.030s : Context switching to pid: 1
+
+0.050s : Foreground process 3 arrived with priority 70
+0.050s : Context switching to pid: 3
+
+0.060s : Process 3 called lock on mutex 0
+0.060s : Context switching to pid: 1
+
+0.080s : Process 1 called v on semaphore 0
+0.080s : Context switching to pid: 2
+
+0.090s : Process 2 called lock on mutex 0
+0.090s : Context switching to pid: 1
+
+0.130s : Process 1 called unlock on mutex 0
+0.130s : Context switching to pid: 2
+
+0.150s : Process 2 called unlock on mutex 0
+
+0.210s : Process 2 has finished execution and is exiting
+0.210s : Context switching to pid: 3
+
+0.230s : Process 3 called unlock on mutex 0
+
+0.300s : Process 3 has finished execution and is exiting
+0.300s : Context switching to pid: 1
+
+0.500s : Process 1 has finished execution and is exiting
+0.500s : Context switching to pid: 0
+

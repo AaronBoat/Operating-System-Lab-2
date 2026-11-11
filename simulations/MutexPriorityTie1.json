@@ -1,0 +1,44 @@
+{
+    "scheduling_algorithm": "Priority",
+    "processes": [
+        {
+            "arrival": 0,
+            "total_cpu_time": 300,
+            "priority": 50,
+            "mutex": [
+                {"id": 0, "lock": 10},
+                {"id": 0, "unlock": 100}
+            ],
+            "semaphore": [
+                {"id": 0, "v": 60}
+            ]
+        },
+        {
+            "arrival": 20,
+            "total_cpu_time": 100,
+            "priority": 70,
+            "semaphore": [
+                {"id": 0, "p": 10}
+            ],
+            "mutex": [
+                {"id": 0, "lock": 20},
+                {"id": 0, "unlock": 40}
+            ]
+        },
+        {
+            "arrival": 50,
+            "total_cpu_time": 100,
+            "priority": 70,
+            "mutex": [
+                {"id": 0, "lock": 10},
+                {"id": 0, "unlock": 30}
+            ]
+        }
+    ],
+    "semaphores": [
+        {"id": 0, "init_val": 0}
+    ],
+    "mutexes": [
+        0
+    ]
+}
