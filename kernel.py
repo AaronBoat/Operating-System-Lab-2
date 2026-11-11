@@ -3,9 +3,18 @@
 # Members: Yizhou Xu, Wendy Wu, Khang Tran
 
 
-
+from dataclasses import dataclass
 from collections import deque
 
+@dataclass
+class Semaphore:
+    value: int
+    waiting_queue: deque 
+
+@dataclass
+class Mutex:
+    owner: PID | None
+    waiting_queue: deque 
 # PID is just an integer, but it is used to make it clear when a integer is expected to be a valid PID.
 PID = int
 
@@ -37,6 +46,8 @@ class Kernel:
     waiting_queue: deque[PCB]
     running: PCB
     idle_pcb: PCB
+    semaphores: dict[int, Semaphore]
+    mutexes: dict[int, Mutex]
 
     ## add timer count for RR
     timer_count: int
@@ -60,6 +71,8 @@ class Kernel:
         self.current_level = "Foreground"       # Level currently open
         self.level_count = 0                    # Timer interrupts for ML scheduling
 
+        self.semaphores = {}    #semaphores: index from id to {value,waiting queue}
+        self.mutexes = {} #mutexes: index from id to {owner, waiting queue}
     # This method is triggered every time a new process has arrived.
     # new_process is this process's PID.
     # DO NOT rename or delete this method. DO NOT change its arguments.
@@ -217,6 +230,7 @@ class Kernel:
     # This method is triggered when the currently running process requests to initialize a new semaphore.
     # DO NOT rename or delete this method. DO NOT change its arguments.
     def syscall_init_semaphore(self, semaphore_id: int, initial_value: int):
+        self.semaphores[semaphore_id] = Semaphore(initial_value,deque())
         return
 
     # This method is triggered when the currently running process calls p() on an existing semaphore.
@@ -232,6 +246,7 @@ class Kernel:
     # This method is triggered when the currently running process requests to initialize a new mutex.
     # DO NOT rename or delete this method. DO NOT change its arguments.
     def syscall_init_mutex(self, mutex_id: int):
+        self.mutexes[mutex_id] = Mutex(None,deque())
         return
 
     # This method is triggered when the currently running process calls lock() on an existing mutex.
@@ -243,5 +258,3 @@ class Kernel:
     # DO NOT rename or delete this method. DO NOT change its arguments.
     def syscall_mutex_unlock(self, mutex_id: int) -> PID:
         return self.running.pid
-
-# testing (move simulator.py into main dir first): python3 simulator.py simulator_p2/simulations/Multilevel1.json output.txt
