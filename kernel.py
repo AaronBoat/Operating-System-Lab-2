@@ -9,12 +9,12 @@ from collections import deque
 @dataclass
 class Semaphore:
     value: int
-    waiting_queue: deque = deque()
+    waiting_queue: deque 
 
 @dataclass
 class Mutex:
     owner: PID | None
-    waiting_queue: deque = deque()
+    waiting_queue: deque 
 # PID is just an integer, but it is used to make it clear when a integer is expected to be a valid PID.
 PID = int
 
